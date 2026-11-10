@@ -29,7 +29,7 @@ function LivroForm({ onLivroSalvo, livroEditando }: LivroFormProps) {
         } catch (err: any) {
             console.error(err);
             const mensagem =
-                err?.response?.data?.message ?? "Erro ao salvar usuário";
+                err?.response?.data?.message ?? "Erro salvar usuário";
             alert(mensagem);
         }
     }

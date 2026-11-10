@@ -17,7 +17,7 @@ function LivroList() {
             })
             .catch((err) => {
                 console.error(err);
-                setErro("Não foi possível carregar os livros.");
+                setErro("Não carregou os livros.");
             })
             .finally(() => setLoading(false));
     }, []);

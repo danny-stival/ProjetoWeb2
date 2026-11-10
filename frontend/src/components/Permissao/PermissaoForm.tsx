@@ -27,7 +27,7 @@ function PermissaoForm({ onPermissaoSalva, permissaoEditando }: PermissaoFormPro
     } catch (err: any) {
         console.error(err);
         const mensagem =
-            err?.response?.data?.message ?? "Erro ao salvar usuário";
+            err?.response?.data?.message ?? "Erro salvar usuário";
         alert(mensagem);
     }
   }
