@@ -1,17 +1,20 @@
-package br.ueg.trindade.danyella_web2_fullstack.Service;
+package br.ueg.trindade.danyella_web2_fullstack.service;
 
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioDTO;
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioRequestDTO;
-import br.ueg.trindade.danyella_web2_fullstack.Model.Usuario;
-import br.ueg.trindade.danyella_web2_fullstack.Repository.UsuarioRepository;
+import br.ueg.trindade.danyella_web2_fullstack.model.Usuario;
+import br.ueg.trindade.danyella_web2_fullstack.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
+
+    private final PasswordEncoder passwordEncoder; //seguranca
 
     private final UsuarioRepository usuarioRepository;
 
@@ -29,9 +32,11 @@ public class UsuarioService {
     }
 
     public UsuarioDTO criar(UsuarioRequestDTO dto) {
+
         if (usuarioRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new RuntimeException("Já existe um usuário com esse username");
         }
+
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Já existe um usuário com esse e-mail");
         }
@@ -40,7 +45,7 @@ public class UsuarioService {
                 .nome(dto.getNome())
                 .username(dto.getUsername())
                 .email(dto.getEmail())
-                .senha(dto.getSenha())
+                .senha(passwordEncoder.encode(dto.getSenha()))
                 .build();
 
         return usuarioRepository.save(usuario).toDTO();

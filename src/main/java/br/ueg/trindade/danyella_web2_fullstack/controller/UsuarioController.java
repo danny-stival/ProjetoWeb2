@@ -1,8 +1,8 @@
-package br.ueg.trindade.danyella_web2_fullstack.Controller;
+package br.ueg.trindade.danyella_web2_fullstack.controller;
 
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioDTO;
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioRequestDTO;
-import br.ueg.trindade.danyella_web2_fullstack.Service.UsuarioService;
+import br.ueg.trindade.danyella_web2_fullstack.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

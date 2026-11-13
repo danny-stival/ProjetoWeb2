@@ -1,4 +1,4 @@
-package br.ueg.trindade.danyella_web2_fullstack.Model;
+package br.ueg.trindade.danyella_web2_fullstack.model;
 
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;

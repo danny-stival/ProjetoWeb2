@@ -1,6 +1,6 @@
-package br.ueg.trindade.danyella_web2_fullstack.Repository;
+package br.ueg.trindade.danyella_web2_fullstack.repository;
 
-import br.ueg.trindade.danyella_web2_fullstack.Model.Usuario;
+import br.ueg.trindade.danyella_web2_fullstack.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

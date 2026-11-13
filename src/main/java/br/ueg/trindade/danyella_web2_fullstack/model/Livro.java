@@ -1,4 +1,4 @@
-package br.ueg.trindade.danyella_web2_fullstack.Model;
+package br.ueg.trindade.danyella_web2_fullstack.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

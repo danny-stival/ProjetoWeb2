@@ -1,4 +1,4 @@
-package br.ueg.trindade.danyella_web2_fullstack.Config;
+package br.ueg.trindade.danyella_web2_fullstack.config;
 // NAO MEXER AQUI ENTAO PETECA O NAGEVGADOR DE NOOVO
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

@@ -1,7 +1,7 @@
-package br.ueg.trindade.danyella_web2_fullstack.Service;
+package br.ueg.trindade.danyella_web2_fullstack.service;
 
-import br.ueg.trindade.danyella_web2_fullstack.Model.Permissao;
-import br.ueg.trindade.danyella_web2_fullstack.Repository.PermissaoRepository;
+import br.ueg.trindade.danyella_web2_fullstack.model.Permissao;
+import br.ueg.trindade.danyella_web2_fullstack.repository.PermissaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

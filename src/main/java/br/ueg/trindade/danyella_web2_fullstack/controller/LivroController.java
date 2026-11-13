@@ -1,7 +1,7 @@
-package br.ueg.trindade.danyella_web2_fullstack.Controller;
+package br.ueg.trindade.danyella_web2_fullstack.controller;
 
-import br.ueg.trindade.danyella_web2_fullstack.Model.Livro;
-import br.ueg.trindade.danyella_web2_fullstack.Repository.LivroRepository;
+import br.ueg.trindade.danyella_web2_fullstack.model.Livro;
+import br.ueg.trindade.danyella_web2_fullstack.repository.LivroRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
