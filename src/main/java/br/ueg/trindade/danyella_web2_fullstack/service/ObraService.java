@@ -17,6 +17,13 @@ public class ObraService {
     private final ObraRepository obraRepository;
     private final UsuarioRepository usuarioRepository;
 
+    private Long obterUsuarioId(String username) {
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado."))
+                .getId();
+    }
+
     public ObraService(ObraRepository obraRepository,
                        UsuarioRepository usuarioRepository) {
         this.obraRepository = obraRepository;
@@ -82,6 +89,37 @@ public class ObraService {
         Obra obra = buscarPorId(id, usuarioId);
 
         obraRepository.delete(obra);
+    }
+
+    // Lista as obras do usuário autenticado
+    public List<Obra> listarPorUsername(String username) {
+        Long usuarioId = obterUsuarioId(username);
+        return listarPorUsuario(usuarioId);
+    }
+
+    // Busca uma obra pertencente ao usuário autenticado
+    public Obra buscarPorIdEUsername(Long id, String username) {
+        Long usuarioId = obterUsuarioId(username);
+        return buscarPorId(id, usuarioId);
+    }
+
+    // Cadastra uma obra para o usuário autenticado
+    public Obra cadastrarPorUsername(Obra obra, String username) {
+        Long usuarioId = obterUsuarioId(username);
+        return cadastrar(obra, usuarioId);
+    }
+
+    // Atualiza uma obra do usuário autenticado
+    public Obra atualizarPorUsername(
+            Long id, Obra dados, String username) {
+        Long usuarioId = obterUsuarioId(username);
+        return atualizar(id, dados, usuarioId);
+    }
+
+    // Exclui uma obra do usuário autenticado
+    public void excluirPorUsername(Long id, String username) {
+        Long usuarioId = obterUsuarioId(username);
+        excluir(id, usuarioId);
     }
 
     // Valida os dados obrigatórios
