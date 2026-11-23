@@ -4,6 +4,7 @@ import br.ueg.trindade.danyella_web2_fullstack.DTO.ObraRequestDTO;
 import br.ueg.trindade.danyella_web2_fullstack.DTO.ObraResponseDTO;
 import br.ueg.trindade.danyella_web2_fullstack.model.Obra;
 import br.ueg.trindade.danyella_web2_fullstack.service.ObraService;
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,8 +23,7 @@ public class ObraController {
 
     private final ObraService obraService;
 
-    // Lista todas as obras do usuário autenticado
-    @GetMapping
+// atenticadoi aqui    @GetMapping
     public List<ObraResponseDTO> listar(
             @AuthenticationPrincipal UserDetails usuario) {
 
@@ -33,7 +33,6 @@ public class ObraController {
                 .toList();
     }
 
-    // Busca uma obra específica
     @GetMapping("/{id}")
     public ObraResponseDTO buscarPorId(
             @PathVariable Long id,
@@ -45,10 +44,10 @@ public class ObraController {
         return converterParaResponse(obra);
     }
 
-    // Cadastra uma nova obra
+
     @PostMapping
     public ResponseEntity<ObraResponseDTO> cadastrar(
-            @RequestBody ObraRequestDTO dto,
+            @RequestBody @Valid ObraRequestDTO dto,
             @AuthenticationPrincipal UserDetails usuario) {
 
         Obra obra = converterParaEntidade(dto);
@@ -60,11 +59,10 @@ public class ObraController {
                 .body(converterParaResponse(obraSalva));
     }
 
-    // Atualiza uma obra existente
     @PutMapping("/{id}")
     public ObraResponseDTO atualizar(
             @PathVariable Long id,
-            @RequestBody ObraRequestDTO dto,
+            @RequestBody @Valid ObraRequestDTO dto,
             @AuthenticationPrincipal UserDetails usuario) {
 
         Obra dados = converterParaEntidade(dto);
@@ -75,7 +73,6 @@ public class ObraController {
         return converterParaResponse(obraAtualizada);
     }
 
-    // Exclui uma obra
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(
             @PathVariable Long id,
@@ -87,7 +84,6 @@ public class ObraController {
         return ResponseEntity.noContent().build();
     }
 
-    // Converte DTO de requisição para entidade
     private Obra converterParaEntidade(ObraRequestDTO dto) {
         return Obra.builder()
                 .titulo(dto.getTitulo())
@@ -106,7 +102,6 @@ public class ObraController {
                 .build();
     }
 
-    // Converte entidade para DTO de resposta
     private ObraResponseDTO converterParaResponse(Obra obra) {
         return ObraResponseDTO.builder()
                 .id(obra.getId())
