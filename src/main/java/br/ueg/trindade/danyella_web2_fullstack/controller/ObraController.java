@@ -23,7 +23,8 @@ public class ObraController {
 
     private final ObraService obraService;
 
-// atenticadoi aqui    @GetMapping
+// atenticadoi aqui
+@GetMapping
     public List<ObraResponseDTO> listar(
             @AuthenticationPrincipal UserDetails usuario) {
 

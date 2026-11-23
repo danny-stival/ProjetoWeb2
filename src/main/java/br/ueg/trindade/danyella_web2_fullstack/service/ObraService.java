@@ -5,7 +5,8 @@ import br.ueg.trindade.danyella_web2_fullstack.model.Obra;
 import br.ueg.trindade.danyella_web2_fullstack.model.Usuario;
 import br.ueg.trindade.danyella_web2_fullstack.repository.ObraRepository;
 import br.ueg.trindade.danyella_web2_fullstack.repository.UsuarioRepository;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,5 +141,16 @@ public class ObraService {
             throw new IllegalArgumentException(
                     "O status da obra é obrigatório.");
         }
+
+        if (obra.getDataInicio() != null
+                && obra.getDataConclusao() != null
+                && obra.getDataConclusao().isBefore(obra.getDataInicio())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A data de conclusão não pode ser anterior à data de início."
+            );
+        }
+
     }
 }
