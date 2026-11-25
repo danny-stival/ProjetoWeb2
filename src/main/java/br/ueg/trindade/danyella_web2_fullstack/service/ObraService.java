@@ -3,6 +3,7 @@ package br.ueg.trindade.danyella_web2_fullstack.service;
 
 import br.ueg.trindade.danyella_web2_fullstack.model.Obra;
 import br.ueg.trindade.danyella_web2_fullstack.model.Usuario;
+import br.ueg.trindade.danyella_web2_fullstack.model.enums.StatusObra;
 import br.ueg.trindade.danyella_web2_fullstack.repository.ObraRepository;
 import br.ueg.trindade.danyella_web2_fullstack.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
@@ -125,6 +126,10 @@ public class ObraService {
 
     // Valida os dados obrigatórios
     private void validarObra(Obra obra) {
+
+        if (obra.getStatus() == StatusObra.CONCLUIDO) {
+            obra.setProgressoAtual(obra.getQuantidadeTotal());
+        }
 
         if (obra.getTitulo() == null ||
                 obra.getTitulo().isBlank()) {

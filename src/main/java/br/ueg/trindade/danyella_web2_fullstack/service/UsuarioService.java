@@ -1,12 +1,17 @@
+
 package br.ueg.trindade.danyella_web2_fullstack.service;
 
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioDTO;
 import br.ueg.trindade.danyella_web2_fullstack.DTO.UsuarioRequestDTO;
 import br.ueg.trindade.danyella_web2_fullstack.model.Usuario;
 import br.ueg.trindade.danyella_web2_fullstack.repository.UsuarioRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -14,11 +19,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsuarioService {
 
-    private final PasswordEncoder passwordEncoder; //seguranca
-
+    private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
 
     public List<UsuarioDTO> listar() {
+
         return usuarioRepository.findAll()
                 .stream()
                 .map(Usuario::toDTO)
@@ -26,19 +31,34 @@ public class UsuarioService {
     }
 
     public UsuarioDTO buscarPorId(Long id) {
+
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado."
+                ));
+
         return usuario.toDTO();
     }
 
     public UsuarioDTO criar(UsuarioRequestDTO dto) {
 
+        // RN - Nome de usuário único
         if (usuarioRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new RuntimeException("Já existe um usuário com esse username");
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este nome de usuário já está em uso."
+            );
         }
 
+        // RN - E-mail único
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("Já existe um usuário com esse e-mail");
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Já existe uma conta cadastrada com este e-mail."
+            );
         }
 
         Usuario usuario = Usuario.builder()
@@ -52,15 +72,31 @@ public class UsuarioService {
     }
 
     public UsuarioDTO atualizar(Long id, UsuarioRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Se o username mudou, valida se o novo já está em uso por outro usuário
-        if (usuarioRepository.existsByUsernameAndIdNot(dto.getUsername(), id)) {
-            throw new RuntimeException("Já existe outro usuário com esse username");
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado."
+                ));
+
+        // Verifica se o username pertence a outro usuário
+        if (usuarioRepository.existsByUsernameAndIdNot(
+                dto.getUsername(), id)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este nome de usuário já está em uso."
+            );
         }
-        if (usuarioRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
-            throw new RuntimeException("Já existe outro usuário com esse e-mail");
+
+        // Verifica se o e-mail pertence a outro usuário
+        if (usuarioRepository.existsByEmailAndIdNot(
+                dto.getEmail(), id)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Já existe uma conta cadastrada com este e-mail."
+            );
         }
 
         usuario.setNome(dto.getNome());
@@ -71,9 +107,15 @@ public class UsuarioService {
     }
 
     public void deletar(Long id) {
+
         if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado");
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Usuário não encontrado."
+            );
         }
+
         usuarioRepository.deleteById(id);
     }
 }
