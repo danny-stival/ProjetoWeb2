@@ -1,4 +1,3 @@
-
 package br.ueg.trindade.danyella_web2_fullstack.DTO;
 
 import br.ueg.trindade.danyella_web2_fullstack.model.enums.StatusObra;

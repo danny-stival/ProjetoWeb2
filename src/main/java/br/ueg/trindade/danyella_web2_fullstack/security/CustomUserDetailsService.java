@@ -5,30 +5,45 @@ import br.ueg.trindade.danyella_web2_fullstack.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService
+        implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
+    // Utilizado durante o login
     @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public UsuarioAutenticado loadUserByUsername(
+            String username
+    ) throws UsernameNotFoundException {
 
-        Usuario usuario = usuarioRepository.findByUsername(username)
+        Usuario usuario = usuarioRepository
+                .findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuário não encontrado"));
+                        new UsernameNotFoundException(
+                                "Usuário não encontrado."
+                        )
+                );
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(usuario.getUsername())
-                .password(usuario.getSenha())
-                .authorities("USER")
-                .build();
+        return new UsuarioAutenticado(usuario);
+    }
+
+    // Utilizado durante a validação do JWT
+    public UsuarioAutenticado loadUserById(Long id) {
+
+        Usuario usuario = usuarioRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "Usuário não encontrado."
+                        )
+                );
+
+        return new UsuarioAutenticado(usuario);
     }
 }

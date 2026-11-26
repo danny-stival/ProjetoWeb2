@@ -4,14 +4,13 @@ import br.ueg.trindade.danyella_web2_fullstack.DTO.ObraRequestDTO;
 import br.ueg.trindade.danyella_web2_fullstack.DTO.ObraResponseDTO;
 import br.ueg.trindade.danyella_web2_fullstack.model.Obra;
 import br.ueg.trindade.danyella_web2_fullstack.service.ObraService;
+import br.ueg.trindade.danyella_web2_fullstack.security.UsuarioAutenticado;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,12 +22,11 @@ public class ObraController {
 
     private final ObraService obraService;
 
-// atenticadoi aqui
-@GetMapping
+    @GetMapping
     public List<ObraResponseDTO> listar(
-            @AuthenticationPrincipal UserDetails usuario) {
+            @AuthenticationPrincipal UsuarioAutenticado usuario) {
 
-        return obraService.listarPorUsername(usuario.getUsername())
+        return obraService.listarPorUsuario(usuario.getId())
                 .stream()
                 .map(this::converterParaResponse)
                 .toList();
@@ -37,24 +35,23 @@ public class ObraController {
     @GetMapping("/{id}")
     public ObraResponseDTO buscarPorId(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails usuario) {
+            @AuthenticationPrincipal UsuarioAutenticado usuario) {
 
-        Obra obra = obraService.buscarPorIdEUsername(
-                id, usuario.getUsername());
+        Obra obra = obraService.buscarPorId(
+                id, usuario.getId());
 
         return converterParaResponse(obra);
     }
 
-
     @PostMapping
     public ResponseEntity<ObraResponseDTO> cadastrar(
             @RequestBody @Valid ObraRequestDTO dto,
-            @AuthenticationPrincipal UserDetails usuario) {
+            @AuthenticationPrincipal UsuarioAutenticado usuario) {
 
         Obra obra = converterParaEntidade(dto);
 
-        Obra obraSalva = obraService.cadastrarPorUsername(
-                obra, usuario.getUsername());
+        Obra obraSalva = obraService.cadastrar(
+                obra, usuario.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(converterParaResponse(obraSalva));
@@ -64,12 +61,12 @@ public class ObraController {
     public ObraResponseDTO atualizar(
             @PathVariable Long id,
             @RequestBody @Valid ObraRequestDTO dto,
-            @AuthenticationPrincipal UserDetails usuario) {
+            @AuthenticationPrincipal UsuarioAutenticado usuario) {
 
         Obra dados = converterParaEntidade(dto);
 
-        Obra obraAtualizada = obraService.atualizarPorUsername(
-                id, dados, usuario.getUsername());
+        Obra obraAtualizada = obraService.atualizar(
+                id, dados, usuario.getId());
 
         return converterParaResponse(obraAtualizada);
     }
@@ -77,15 +74,15 @@ public class ObraController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails usuario) {
+            @AuthenticationPrincipal UsuarioAutenticado usuario) {
 
-        obraService.excluirPorUsername(
-                id, usuario.getUsername());
+        obraService.excluir(id, usuario.getId());
 
         return ResponseEntity.noContent().build();
     }
 
     private Obra converterParaEntidade(ObraRequestDTO dto) {
+
         return Obra.builder()
                 .titulo(dto.getTitulo())
                 .criador(dto.getCriador())
@@ -104,6 +101,7 @@ public class ObraController {
     }
 
     private ObraResponseDTO converterParaResponse(Obra obra) {
+
         return ObraResponseDTO.builder()
                 .id(obra.getId())
                 .titulo(obra.getTitulo())

@@ -1,4 +1,3 @@
-
 package br.ueg.trindade.danyella_web2_fullstack.exception;
 
 import br.ueg.trindade.danyella_web2_fullstack.DTO.ErroResponseDTO;
@@ -12,6 +11,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import java.time.LocalDateTime;
 
@@ -19,53 +22,101 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Exceções das regras de negócio
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErroResponseDTO> tratarRegraNegocio(
-            ResponseStatusException ex) {
+    public ResponseEntity<ErroResponseDTO> tratarResponseStatus(
+            ResponseStatusException ex
+    ) {
 
-        return criarResposta(
-                ex.getStatusCode().value(),
-                ex.getReason()
-        );
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(new ErroResponseDTO(
+                        ex.getStatusCode().value(),
+                        ex.getReason(),
+                        LocalDateTime.now()
+                ));
     }
 
-    // Erros de validação dos DTOs
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponseDTO> tratarValidacao(
-            MethodArgumentNotValidException ex) {
+            MethodArgumentNotValidException ex
+    ) {
 
         String mensagem = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(erro -> erro.getDefaultMessage())
                 .findFirst()
+                .map(erro -> erro.getDefaultMessage())
                 .orElse("Dados inválidos.");
 
         return criarResposta(
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST,
                 mensagem
         );
     }
-
-    // Violações de integridade do banco de dados
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErroResponseDTO> tratarIntegridade(
-            DataIntegrityViolationException ex) {
+            DataIntegrityViolationException ex
+    ) {
+
+        log.warn("Violação de integridade no banco de dados.");
 
         return criarResposta(
-                HttpStatus.CONFLICT.value(),
-                "Os dados informados conflitam com os registros existentes."
+                HttpStatus.CONFLICT,
+                "A operação não pôde ser concluída devido a um conflito de dados."
         );
     }
 
-    // Método auxiliar para padronizar as respostas
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErroResponseDTO> tratarTamanhoArquivo(
+            MaxUploadSizeExceededException ex
+    ) {
+
+        return criarResposta(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "A imagem deve possuir no máximo 2 MB."
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErroResponseDTO> tratarArquivoAusente(
+            MissingServletRequestPartException ex
+    ) {
+
+        return criarResposta(
+                HttpStatus.BAD_REQUEST,
+                "O arquivo obrigatório não foi enviado."
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErroResponseDTO> tratarJsonInvalido(
+            HttpMessageNotReadableException ex
+    ) {
+
+        return criarResposta(
+                HttpStatus.BAD_REQUEST,
+                "O corpo da requisição está ausente ou possui dados inválidos."
+        );
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErroResponseDTO> tratarFormatoInvalido(
+            HttpMediaTypeNotSupportedException ex
+    ) {
+
+        return criarResposta(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "O formato da requisição não é suportado."
+        );
+    }
+
     private ResponseEntity<ErroResponseDTO> criarResposta(
-            int status,
-            String mensagem) {
+            HttpStatus status,
+            String mensagem
+    ) {
 
         ErroResponseDTO erro = new ErroResponseDTO(
-                status,
+                status.value(),
                 mensagem,
                 LocalDateTime.now()
         );

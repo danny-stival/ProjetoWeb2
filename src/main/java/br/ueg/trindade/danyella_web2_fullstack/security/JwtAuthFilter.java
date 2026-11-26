@@ -1,5 +1,8 @@
 package br.ueg.trindade.danyella_web2_fullstack.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,7 +33,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader =
+                request.getHeader("Authorization");
 
         if (authorizationHeader == null ||
                 !authorizationHeader.startsWith("Bearer ")) {
@@ -42,18 +46,41 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
 
         try {
-            String username = jwtService.validarToken(token);
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            Claims claims = jwtService.validarToken(token);
 
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(username);
+            Long usuarioId = Long.valueOf(
+                    claims.getSubject()
+            );
+
+            Integer versaoToken = claims.get(
+                    "versao",
+                    Integer.class
+            );
+
+            UsuarioAutenticado usuario =
+                    userDetailsService.loadUserById(usuarioId);
+
+            // RN - O token deve possuir a versão atual
+            // das credenciais do usuário.
+            if (versaoToken == null ||
+                    !versaoToken.equals(usuario.getVersaoToken())) {
+
+                throw new JwtException(
+                        "Token invalidado."
+                );
+            }
+
+            if (SecurityContextHolder.getContext()
+                    .getAuthentication() == null) {
+
+                usuario.eraseCredentials();
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
+                                usuario,
                                 null,
-                                userDetails.getAuthorities()
+                                usuario.getAuthorities()
                         );
 
                 authentication.setDetails(
@@ -65,19 +92,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .setAuthentication(authentication);
             }
 
-        } catch (Exception e) {
+        } catch (
+                JwtException |
+                IllegalArgumentException |
+                UsernameNotFoundException e
+        ) {
+
             SecurityContextHolder.clearContext();
+
             response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token inválido ou expirado"
+                    "Token inválido, expirado ou revogado."
             );
+
             return;
         }
 
         filterChain.doFilter(request, response);
     }
+
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(
+            HttpServletRequest request
+    ) {
+
         String path = request.getServletPath();
 
         return path.startsWith("/api/auth/");
