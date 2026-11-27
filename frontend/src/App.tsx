@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 import Login from "./components/Auth/Login";
@@ -8,7 +8,7 @@ import ObraList from "./components/Obra/ObraList";
 import ObraForm from "./components/Obra/ObraForm";
 
 import MenuUsuario from "./components/Perfil/MenuUsuario";
-import Avatar from "./components/Perfil/Avatar";
+import Perfil from "./components/Perfil/Perfil";
 
 import {
     estaAutenticado,
@@ -20,15 +20,11 @@ import {
     consultarFoto
 } from "./services/perfilService";
 
-import type { Perfil } from "./types/Perfil";
+import type { Perfil as PerfilDados } from "./types/Perfil";
 
 import "./App.css";
 
-type Tela =
-    | "login"
-    | "cadastro"
-    | "dashboard"
-    | "perfil";
+type Tela = "login" | "cadastro" | "dashboard" | "perfil";
 
 export default function App() {
 
@@ -36,28 +32,34 @@ export default function App() {
         estaAutenticado() ? "dashboard" : "login"
     );
 
-    const [atualizarObras, setAtualizarObras] =
-        useState(0);
-
-    const [modalAberto, setModalAberto] =
-        useState(false);
+    const [atualizarObras, setAtualizarObras] = useState(0);
+    const [modalAberto, setModalAberto] = useState(false);
 
     const [perfil, setPerfil] =
-        useState<Perfil | null>(null);
+        useState<PerfilDados | null>(null);
 
     const [fotoUrl, setFotoUrl] =
         useState<string | null>(null);
 
-    const [erroPerfil, setErroPerfil] =
-        useState("");
-
-    const [recarregarPerfil, setRecarregarPerfil] =
-        useState(0);
+    const [erroPerfil, setErroPerfil] = useState("");
+    const [recarregarPerfil, setRecarregarPerfil] = useState(0);
 
     const autenticado =
         tela === "dashboard" || tela === "perfil";
 
-    // Carrega os dados do usuário autenticado
+    const sair = useCallback(() => {
+
+        logout();
+
+        setPerfil(null);
+        setFotoUrl(null);
+        setErroPerfil("");
+        setModalAberto(false);
+        setAtualizarObras(0);
+        setTela("login");
+
+    }, []);
+
     useEffect(() => {
 
         if (!autenticado) return;
@@ -68,6 +70,7 @@ export default function App() {
         async function carregarPerfil() {
 
             setErroPerfil("");
+            setFotoUrl(null);
 
             try {
 
@@ -85,11 +88,7 @@ export default function App() {
                     axios.isAxiosError(erro) &&
                     erro.response?.status === 401
                 ) {
-                    logout();
-                    setPerfil(null);
-                    setFotoUrl(null);
-                    setModalAberto(false);
-                    setTela("login");
+                    sair();
                     return;
                 }
 
@@ -126,23 +125,19 @@ export default function App() {
                     axios.isAxiosError(erro) &&
                     erro.response?.status === 401
                 ) {
-                    logout();
-                    setPerfil(null);
-                    setFotoUrl(null);
-                    setModalAberto(false);
-                    setTela("login");
+                    sair();
                     return;
                 }
 
                 setFotoUrl(null);
 
-                console.error(
+                setErroPerfil(
                     "Não foi possível carregar a fotografia."
                 );
             }
         }
 
-        carregarPerfil();
+        void carregarPerfil();
 
         return () => {
 
@@ -153,9 +148,8 @@ export default function App() {
             }
         };
 
-    }, [autenticado, recarregarPerfil]);
+    }, [autenticado, recarregarPerfil, sair]);
 
-    // Controle do modal de cadastro de obras
     useEffect(() => {
 
         if (!modalAberto) return;
@@ -167,10 +161,7 @@ export default function App() {
             }
         }
 
-        document.addEventListener(
-            "keydown",
-            fecharComEsc
-        );
+        document.addEventListener("keydown", fecharComEsc);
 
         const overflowAnterior =
             document.body.style.overflow;
@@ -198,20 +189,6 @@ export default function App() {
         setTela("dashboard");
     }
 
-    function sair() {
-
-        logout();
-
-        setPerfil(null);
-        setFotoUrl(null);
-        setErroPerfil("");
-
-        setModalAberto(false);
-        setAtualizarObras(0);
-
-        setTela("login");
-    }
-
     function abrirPerfil() {
 
         setModalAberto(false);
@@ -223,13 +200,17 @@ export default function App() {
         setTela("dashboard");
     }
 
+    function atualizarDadosPerfil() {
+
+        setRecarregarPerfil(valor => valor + 1);
+    }
+
     function obraCadastrada() {
 
         setAtualizarObras(valor => valor + 1);
         setModalAberto(false);
     }
 
-    // Tela de login
     if (tela === "login") {
 
         return (
@@ -246,7 +227,6 @@ export default function App() {
         );
     }
 
-    // Tela de cadastro
     if (tela === "cadastro") {
 
         return (
@@ -262,7 +242,6 @@ export default function App() {
         );
     }
 
-    // Área autenticada
     return (
 
         <div className="dashboard">
@@ -308,17 +287,14 @@ export default function App() {
 
                 {erroPerfil && (
 
-                    <div role="alert">
+                    <div className="perfil-erro" role="alert">
 
                         <p>{erroPerfil}</p>
 
                         <button
                             type="button"
-                            onClick={() =>
-                                setRecarregarPerfil(
-                                    valor => valor + 1
-                                )
-                            }
+                            className="perfil-botao-secundario"
+                            onClick={atualizarDadosPerfil}
                         >
                             Tentar novamente
                         </button>
@@ -340,10 +316,9 @@ export default function App() {
                             <h2>Minha biblioteca</h2>
 
                             <p>
-                                Toda história merece ser
-                                lembrada. Colecione, descubra
-                                e revisite seus universos
-                                favoritos.
+                                Toda história merece ser lembrada.
+                                Colecione, descubra e revisite
+                                seus universos favoritos.
                             </p>
 
                         </section>
@@ -404,25 +379,12 @@ export default function App() {
 
                         {perfil && (
 
-                            <section className="perfil-provisorio">
-
-                                <Avatar
-                                    nome={perfil.nome}
-                                    fotoUrl={fotoUrl}
-                                    tamanho="grande"
-                                />
-
-                                <div>
-
-                                    <h2>{perfil.nome}</h2>
-
-                                    <p>@{perfil.username}</p>
-
-                                    <p>{perfil.email}</p>
-
-                                </div>
-
-                            </section>
+                            <Perfil
+                                perfil={perfil}
+                                fotoUrl={fotoUrl}
+                                onAtualizar={atualizarDadosPerfil}
+                                onSair={sair}
+                            />
 
                         )}
 
@@ -444,9 +406,7 @@ export default function App() {
                         role="dialog"
                         aria-modal="true"
                         aria-label="Adicionar nova obra"
-                        onClick={event =>
-                            event.stopPropagation()
-                        }
+                        onClick={event => event.stopPropagation()}
                     >
 
                         <div className="modal-topo">
@@ -459,9 +419,7 @@ export default function App() {
                                 type="button"
                                 className="modal-fechar"
                                 aria-label="Fechar formulário"
-                                onClick={() =>
-                                    setModalAberto(false)
-                                }
+                                onClick={() => setModalAberto(false)}
                             >
                                 ×
                             </button>

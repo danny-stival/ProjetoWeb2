@@ -327,3 +327,414 @@
     color: var(--texto-secundario, #806B55);
     margin: 4px 0;
 }
+
+
+/* =========================================
+   FICHA DO COLECIONADOR
+========================================= */
+
+.perfil-pagina {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+    color: var(--marrom);
+}
+
+.perfil-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.perfil-card {
+    padding: 28px;
+    background: var(--papel);
+    border: 2px solid var(--marrom);
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 var(--marrom);
+}
+
+.perfil-card h2 {
+    font-family: var(--fonte-titulo);
+    font-size: 26px;
+    margin: 10px 0 20px;
+}
+
+.perfil-card h3 {
+    font-family: var(--fonte-titulo);
+    margin-top: 28px;
+}
+
+.perfil-etiqueta {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--verde);
+}
+
+.perfil-identidade {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.perfil-identificacao {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.perfil-identificacao h2 {
+    font-size: 32px;
+    margin: 8px 0;
+}
+
+.perfil-identificacao p {
+    margin: 5px 0;
+    color: var(--texto-secundario);
+}
+
+.perfil-identificacao small {
+    color: var(--texto-secundario);
+}
+
+.perfil-acoes-foto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 10px;
+}
+
+/* Botões */
+
+.perfil-botao,
+.perfil-upload,
+.perfil-botao-secundario,
+.perfil-botao-perigo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    border: 2px solid var(--marrom);
+    border-radius: 4px;
+
+    font-family: var(--fonte-texto);
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.perfil-botao,
+.perfil-upload {
+    background: var(--mostarda);
+    color: var(--marrom);
+    box-shadow: 3px 3px 0 var(--marrom);
+}
+
+.perfil-botao-secundario {
+    background: var(--papel);
+    color: var(--marrom);
+}
+
+.perfil-botao-perigo {
+    background: var(--vermelho);
+    color: var(--papel);
+}
+
+.perfil-botao:hover,
+.perfil-upload:hover,
+.perfil-botao-secundario:hover,
+.perfil-botao-perigo:hover {
+    transform: translateY(-2px);
+}
+
+.perfil-pagina button:disabled,
+.perfil-conteudo:disabled .perfil-upload {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.perfil-upload {
+    position: relative;
+}
+
+.perfil-upload input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.perfil-upload:focus-within {
+    outline: 2px solid var(--verde);
+    outline-offset: 3px;
+}
+
+/* Estatísticas */
+
+.perfil-estatisticas {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.perfil-numero {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 18px 12px;
+
+    border: 2px solid var(--marrom);
+    border-radius: 4px;
+}
+
+.perfil-numero strong {
+    font-family: var(--fonte-titulo);
+    font-size: 36px;
+}
+
+.perfil-numero span {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.perfil-numero.mostarda {
+    background: var(--mostarda);
+}
+
+.perfil-numero.verde {
+    background: var(--verde);
+    color: var(--papel);
+}
+
+.perfil-numero.laranja {
+    background: var(--laranja);
+    color: var(--marrom);
+}
+
+.perfil-numero.creme {
+    background: var(--creme);
+}
+
+.perfil-numero.vermelho {
+    background: var(--vermelho);
+    color: var(--papel);
+}
+
+/* Gráficos */
+
+.perfil-progresso {
+    margin-top: 26px;
+}
+
+.perfil-progresso-titulo {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.perfil-pagina progress {
+    display: block;
+    width: 100%;
+    height: 16px;
+
+    appearance: none;
+
+    border: 1px solid var(--marrom);
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--creme);
+}
+
+.perfil-pagina progress::-webkit-progress-bar {
+    background: var(--creme);
+}
+
+.perfil-pagina progress::-webkit-progress-value {
+    background: var(--verde);
+}
+
+.perfil-pagina progress::-moz-progress-bar {
+    background: var(--verde);
+}
+
+.perfil-categorias {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.perfil-categoria {
+    display: grid;
+    grid-template-columns: 75px 1fr 35px;
+    align-items: center;
+    gap: 15px;
+}
+
+.perfil-categoria strong {
+    text-align: right;
+}
+
+/* Configurações */
+
+.perfil-opcao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    padding: 18px 0;
+
+    border: 0;
+    border-bottom: 1px solid rgba(73, 51, 41, 0.2);
+
+    background: transparent;
+    color: var(--marrom);
+
+    font-family: var(--fonte-texto);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.perfil-opcao:hover {
+    color: var(--verde);
+}
+
+.perfil-opcao span {
+    font-size: 24px;
+    color: var(--verde);
+}
+
+.perfil-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+
+    padding: 20px;
+    margin: 12px 0;
+
+    background: var(--creme);
+    border-radius: 4px;
+}
+
+.perfil-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    width: 100%;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.perfil-form input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+
+    border: 1px solid var(--marrom);
+    border-radius: 4px;
+
+    background: var(--papel);
+    color: var(--marrom);
+
+    font-family: var(--fonte-texto);
+    font-size: 14px;
+}
+
+.perfil-form input:focus {
+    outline: 2px solid var(--verde);
+}
+
+.perfil-form small {
+    color: var(--texto-secundario);
+}
+
+/* Exclusão */
+
+.perfil-perigo {
+    border-color: var(--vermelho);
+}
+
+.perfil-perigo h2,
+.perfil-perigo .perfil-etiqueta {
+    color: var(--vermelho);
+}
+
+.perfil-perigo p {
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Mensagens */
+
+.perfil-erro,
+.perfil-sucesso {
+    padding: 16px;
+    border: 2px solid;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.perfil-erro {
+    background: #F9E4DF;
+    color: #A63832;
+    border-color: #A63832;
+}
+
+.perfil-sucesso {
+    background: #E1EDE2;
+    color: #285C48;
+    border-color: #317B76;
+}
+
+/* Responsividade */
+
+@media (max-width: 900px) {
+    .perfil-estatisticas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+
+    .perfil-estatisticas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .perfil-card {
+        padding: 18px;
+    }
+
+    .perfil-identidade {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .perfil-identificacao h2 {
+        font-size: 26px;
+    }
+
+    .perfil-form {
+        padding: 14px;
+    }
+}
