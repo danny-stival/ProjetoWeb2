@@ -1,14 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate,
+    NavLink,
+    Outlet,
+    useNavigate
+} from "react-router-dom";
+
 import Login from "./components/Auth/Login";
 import Cadastro from "./components/Auth/Cadastro";
 
-import ObraList from "./components/Obra/ObraList";
-import ObraForm from "./components/Obra/ObraForm";
-
 import MenuUsuario from "./components/Perfil/MenuUsuario";
-import Perfil from "./components/Perfil/Perfil";
+
+import BibliotecaPage from "./pages/BibliotecaPage";
+import ResenhasPage from "./pages/ResenhasPage";
+import PerfilPage from "./pages/PerfilPage";
 
 import {
     estaAutenticado,
@@ -24,16 +34,12 @@ import type { Perfil as PerfilDados } from "./types/Perfil";
 
 import "./App.css";
 
-type Tela = "login" | "cadastro" | "dashboard" | "perfil";
+function Aplicacao() {
 
-export default function App() {
+    const navigate = useNavigate();
 
-    const [tela, setTela] = useState<Tela>(
-        estaAutenticado() ? "dashboard" : "login"
-    );
-
-    const [atualizarObras, setAtualizarObras] = useState(0);
-    const [modalAberto, setModalAberto] = useState(false);
+    const [autenticado, setAutenticado] =
+        useState(estaAutenticado);
 
     const [perfil, setPerfil] =
         useState<PerfilDados | null>(null);
@@ -42,23 +48,34 @@ export default function App() {
         useState<string | null>(null);
 
     const [erroPerfil, setErroPerfil] = useState("");
-    const [recarregarPerfil, setRecarregarPerfil] = useState(0);
 
-    const autenticado =
-        tela === "dashboard" || tela === "perfil";
+    const [recarregarPerfil, setRecarregarPerfil] =
+        useState(0);
 
     const sair = useCallback(() => {
 
         logout();
 
+        setAutenticado(false);
         setPerfil(null);
         setFotoUrl(null);
         setErroPerfil("");
-        setModalAberto(false);
-        setAtualizarObras(0);
-        setTela("login");
 
-    }, []);
+        navigate("/login", { replace: true });
+
+    }, [navigate]);
+
+    function entrar() {
+
+        setAutenticado(true);
+
+        navigate("/biblioteca", { replace: true });
+    }
+
+    function atualizarDadosPerfil() {
+
+        setRecarregarPerfil(valor => valor + 1);
+    }
 
     useEffect(() => {
 
@@ -129,8 +146,6 @@ export default function App() {
                     return;
                 }
 
-                setFotoUrl(null);
-
                 setErroPerfil(
                     "Não foi possível carregar a fotografia."
                 );
@@ -150,296 +165,226 @@ export default function App() {
 
     }, [autenticado, recarregarPerfil, sair]);
 
-    useEffect(() => {
+    return (
 
-        if (!modalAberto) return;
+        <Routes>
 
-        function fecharComEsc(event: KeyboardEvent) {
+            {/* ROTAS PÚBLICAS */}
 
-            if (event.key === "Escape") {
-                setModalAberto(false);
-            }
-        }
+            <Route
+                path="/login"
+                element={
+                    autenticado ? (
 
-        document.addEventListener("keydown", fecharComEsc);
+                        <Navigate
+                            to="/biblioteca"
+                            replace
+                        />
 
-        const overflowAnterior =
-            document.body.style.overflow;
+                    ) : (
 
-        document.body.style.overflow = "hidden";
+                        <div className="auth-container">
 
-        return () => {
+                            <Login
+                                onLogin={entrar}
+                                onIrParaCadastro={() =>
+                                    navigate("/cadastro")
+                                }
+                            />
 
-            document.removeEventListener(
-                "keydown",
-                fecharComEsc
-            );
+                        </div>
 
-            document.body.style.overflow =
-                overflowAnterior;
-        };
+                    )
+                }
+            />
 
-    }, [modalAberto]);
+            <Route
+                path="/cadastro"
+                element={
+                    autenticado ? (
 
-    function entrar() {
+                        <Navigate
+                            to="/biblioteca"
+                            replace
+                        />
 
-        setPerfil(null);
-        setFotoUrl(null);
-        setErroPerfil("");
-        setTela("dashboard");
-    }
+                    ) : (
 
-    function abrirPerfil() {
+                        <div className="auth-container">
 
-        setModalAberto(false);
-        setTela("perfil");
-    }
+                            <Cadastro
+                                onVoltarLogin={() =>
+                                    navigate("/login")
+                                }
+                            />
 
-    function abrirBiblioteca() {
+                        </div>
 
-        setTela("dashboard");
-    }
+                    )
+                }
+            />
 
-    function atualizarDadosPerfil() {
+            {/* ROTAS PROTEGIDAS */}
 
-        setRecarregarPerfil(valor => valor + 1);
-    }
+            <Route
+                element={
+                    autenticado ? (
 
-    function obraCadastrada() {
+                        <div className="dashboard">
 
-        setAtualizarObras(valor => valor + 1);
-        setModalAberto(false);
-    }
+                            <header className="dashboard-header">
 
-    if (tela === "login") {
+                                <div className="marca">
 
-        return (
-            <div className="auth-container">
+                                    <span className="marca-subtitulo">
+                                        Seu universo de histórias
+                                    </span>
 
-                <Login
-                    onLogin={entrar}
-                    onIrParaCadastro={() =>
-                        setTela("cadastro")
+                                    <h1>Diário de Histórias</h1>
+
+                                </div>
+
+                                {perfil ? (
+
+                                    <MenuUsuario
+                                        perfil={perfil}
+                                        fotoUrl={fotoUrl}
+                                        onAbrirPerfil={() =>
+                                            navigate("/perfil")
+                                        }
+                                        onAbrirBiblioteca={() =>
+                                            navigate("/biblioteca")
+                                        }
+                                        onSair={sair}
+                                    />
+
+                                ) : (
+
+                                    <button
+                                        className="botao-sair"
+                                        onClick={sair}
+                                    >
+                                        Sair
+                                    </button>
+
+                                )}
+
+                            </header>
+
+                            <div className="faixa-retro" />
+
+                            <nav
+                                className="navegacao-principal"
+                                aria-label="Navegação principal"
+                            >
+
+                                <NavLink to="/biblioteca">
+                                    Biblioteca
+                                </NavLink>
+
+                                <NavLink to="/resenhas">
+                                    Resenhas
+                                </NavLink>
+
+                                <NavLink to="/perfil">
+                                    Meu perfil
+                                </NavLink>
+
+                            </nav>
+
+                            <main className="dashboard-main">
+
+                                {erroPerfil && (
+
+                                    <div
+                                        className="perfil-erro"
+                                        role="alert"
+                                    >
+
+                                        <p>{erroPerfil}</p>
+
+                                        <button
+                                            className="perfil-botao-secundario"
+                                            onClick={atualizarDadosPerfil}
+                                        >
+                                            Tentar novamente
+                                        </button>
+
+                                    </div>
+
+                                )}
+
+                                <Outlet />
+
+                            </main>
+
+                            <footer className="dashboard-footer">
+                                Diário de Histórias — Desde 2026
+                            </footer>
+
+                        </div>
+
+                    ) : (
+
+                        <Navigate to="/login" replace />
+
+                    )
+                }
+            >
+
+                <Route
+                    path="/biblioteca"
+                    element={<BibliotecaPage />}
+                />
+
+                <Route
+                    path="/resenhas"
+                    element={<ResenhasPage />}
+                />
+
+                <Route
+                    path="/perfil"
+                    element={
+                        <PerfilPage
+                            perfil={perfil}
+                            fotoUrl={fotoUrl}
+                            onAtualizar={atualizarDadosPerfil}
+                            onSair={sair}
+                        />
                     }
                 />
 
-            </div>
-        );
-    }
+            </Route>
 
-    if (tela === "cadastro") {
+            {/* ROTA PADRÃO */}
 
-        return (
-            <div className="auth-container">
+            <Route
+                path="*"
+                element={
+                    <Navigate
+                        to={
+                            autenticado
+                                ? "/biblioteca"
+                                : "/login"
+                        }
+                        replace
+                    />
+                }
+            />
 
-                <Cadastro
-                    onVoltarLogin={() =>
-                        setTela("login")
-                    }
-                />
+        </Routes>
+    );
+}
 
-            </div>
-        );
-    }
+export default function App() {
 
     return (
 
-        <div className="dashboard">
+        <BrowserRouter>
 
-            <header className="dashboard-header">
+            <Aplicacao />
 
-                <div className="marca">
+        </BrowserRouter>
 
-                    <span className="marca-subtitulo">
-                        Seu universo de histórias
-                    </span>
-
-                    <h1>Diário de Histórias</h1>
-
-                </div>
-
-                {perfil ? (
-
-                    <MenuUsuario
-                        perfil={perfil}
-                        fotoUrl={fotoUrl}
-                        onAbrirPerfil={abrirPerfil}
-                        onAbrirBiblioteca={abrirBiblioteca}
-                        onSair={sair}
-                    />
-
-                ) : (
-
-                    <button
-                        className="botao-sair"
-                        onClick={sair}
-                    >
-                        Sair
-                    </button>
-
-                )}
-
-            </header>
-
-            <div className="faixa-retro" />
-
-            <main className="dashboard-main">
-
-                {erroPerfil && (
-
-                    <div className="perfil-erro" role="alert">
-
-                        <p>{erroPerfil}</p>
-
-                        <button
-                            type="button"
-                            className="perfil-botao-secundario"
-                            onClick={atualizarDadosPerfil}
-                        >
-                            Tentar novamente
-                        </button>
-
-                    </div>
-
-                )}
-
-                {tela === "dashboard" ? (
-
-                    <>
-
-                        <section className="boas-vindas">
-
-                            <span className="etiqueta">
-                                EST. 2026 — COLEÇÃO PESSOAL
-                            </span>
-
-                            <h2>Minha biblioteca</h2>
-
-                            <p>
-                                Toda história merece ser lembrada.
-                                Colecione, descubra e revisite
-                                seus universos favoritos.
-                            </p>
-
-                        </section>
-
-                        <div className="biblioteca-acoes">
-
-                            <span className="biblioteca-subtitulo">
-                                ✳ SUA ESTANTE PESSOAL
-                            </span>
-
-                            <button
-                                className="botao-nova-obra"
-                                onClick={() =>
-                                    setModalAberto(true)
-                                }
-                            >
-                                + Nova história
-                            </button>
-
-                        </div>
-
-                        <section className="painel-biblioteca">
-
-                            <ObraList
-                                atualizar={atualizarObras}
-                            />
-
-                        </section>
-
-                    </>
-
-                ) : (
-
-                    <>
-
-                        <button
-                            type="button"
-                            onClick={abrirBiblioteca}
-                            className="botao-voltar-biblioteca"
-                        >
-                            ← Voltar à biblioteca
-                        </button>
-
-                        <section className="boas-vindas">
-
-                            <span className="etiqueta">
-                                EST. 2026 — IDENTIDADE PESSOAL
-                            </span>
-
-                            <h2>Ficha do colecionador</h2>
-
-                            <p>
-                                Cada história faz parte
-                                da sua própria história.
-                            </p>
-
-                        </section>
-
-                        {perfil && (
-
-                            <Perfil
-                                perfil={perfil}
-                                fotoUrl={fotoUrl}
-                                onAtualizar={atualizarDadosPerfil}
-                                onSair={sair}
-                            />
-
-                        )}
-
-                    </>
-
-                )}
-
-            </main>
-
-            {modalAberto && tela === "dashboard" && (
-
-                <div
-                    className="modal-overlay"
-                    onClick={() => setModalAberto(false)}
-                >
-
-                    <div
-                        className="modal-conteudo"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Adicionar nova obra"
-                        onClick={event => event.stopPropagation()}
-                    >
-
-                        <div className="modal-topo">
-
-                            <span>
-                                NOVA FICHA — COLEÇÃO PESSOAL
-                            </span>
-
-                            <button
-                                type="button"
-                                className="modal-fechar"
-                                aria-label="Fechar formulário"
-                                onClick={() => setModalAberto(false)}
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-                        <ObraForm
-                            onObraCadastrada={obraCadastrada}
-                        />
-
-                    </div>
-
-                </div>
-
-            )}
-
-            <footer className="dashboard-footer">
-                Diário de Histórias — Desde 2026
-            </footer>
-
-        </div>
     );
 }
