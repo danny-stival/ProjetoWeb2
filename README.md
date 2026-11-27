@@ -47,6 +47,7 @@ Proporcionar ao usuário um ambiente personalizado para organizar suas história
 - Spring Boot
 - Spring Web
 - Spring Security
+- React Router
 - Spring Data JPA
 - Hibernate
 - Jakarta Validation
